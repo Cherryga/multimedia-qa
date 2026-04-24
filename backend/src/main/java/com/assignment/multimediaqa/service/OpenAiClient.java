@@ -17,11 +17,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.Duration;
 
 @Service
 public class OpenAiClient {
 
-    private final HttpClient httpClient = HttpClient.newHttpClient();
+   private final HttpClient httpClient = HttpClient.newBuilder()
+        .connectTimeout(Duration.ofSeconds(10))
+        .build();
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final String apiKey;
     private final String baseUrl;
