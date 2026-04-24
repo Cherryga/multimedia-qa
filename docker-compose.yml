@@ -1,0 +1,45 @@
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: multimedia_qa
+      MYSQL_USER: multimedia
+      MYSQL_PASSWORD: multimedia
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - mysql_data:/var/lib/mysql
+    
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  backend:
+    build: ./backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/multimedia_qa
+      SPRING_DATASOURCE_USERNAME: multimedia
+      SPRING_DATASOURCE_PASSWORD: multimedia
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      SERVER_PORT: 8081
+      APP_STORAGE_PATH: /app/storage
+      APP_CORS_ORIGINS: http://localhost:3000,http://localhost:5173
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mysql
+    volumes:
+      - app_storage:/app/storage
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
+  app_storage:
